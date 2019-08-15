@@ -21,13 +21,15 @@
   -->
 
 <template>
-	<Multiselect class="sharing-input" :searchable="true" :loading="loading"
-		:internal-search="false" :limit="3"
+	<Multiselect ref="multiselect" class="sharing-input"
+		:searchable="true" :loading="loading"
+		:internal-search="false"
 		:options="options"  :placeholder="inputPlaceholder"
 		:user-select="true" :hide-selected="true"
 		:preserve-search="true" :preselect-first="true"
 		@search-change="asyncFind" @select="addShare">
-		<template #noOptions>{{ noOptionText }}</template>
+		<template #noOptions>{{ t('files_sharing', 'No recommendations. Start typing.') }}</template>
+		<template #noResult>{{ noResultText }}</template>
 	</Multiselect>
 </template>
 
@@ -123,11 +125,11 @@ export default {
 			return this.recommendations
 		},
 
-		noOptionText() {
-			if (this.isValidQuery) {
-				return t('files_sharing', 'No results')
+		noResultText() {
+			if (this.loading) {
+				return t('files_sharing', 'Searching...')
 			}
-			return t('files_sharing', 'No recommendations. Start typing.')
+			return t('files_sharing', 'No elements found.')
 		}
 	},
 
@@ -141,6 +143,9 @@ export default {
 			// recommendations or search results
 			this.query = query.trim()
 			if (this.isValidQuery) {
+				// start loading now to have proper ux feedback
+				// during the debounce
+				this.loading = true
 				await this.debounceGetSuggestions(query)
 			}
 		},
@@ -343,8 +348,9 @@ export default {
 		 */
 		formatForMultiselect(result) {
 			let desc
-			if (result.value.shareType === this.SHARE_TYPES.SHARE_TYPE_REMOTE
-				|| result.value.shareType === this.SHARE_TYPES.SHARE_TYPE_REMOTE_GROUP) {
+			if ((result.value.shareType === this.SHARE_TYPES.SHARE_TYPE_REMOTE
+					|| result.value.shareType === this.SHARE_TYPES.SHARE_TYPE_REMOTE_GROUP
+				) && result.value.server) {
 				desc = t('files_sharing', 'on {server}', { server: result.value.server })
 			} else if (result.value.shareType === this.SHARE_TYPES.SHARE_TYPE_EMAIL) {
 				desc = result.value.shareWith
@@ -354,6 +360,7 @@ export default {
 				shareWith: result.value.shareWith,
 				shareType: result.value.shareType,
 				user: result.uuid || result.value.shareWith,
+				isNoUser: !result.uuid,
 				displayName: result.name || result.label,
 				desc,
 				icon: this.shareTypeToIcon(result.value.shareType)
@@ -378,7 +385,7 @@ export default {
 
 			this.loading = true
 			try {
-				const path = this.fileInfo.path + this.fileInfo.name
+				const path = (this.fileInfo.path + '/' + this.fileInfo.name).replace('//', '/')
 				const share = await this.createShare({
 					path,
 					shareType: value.shareType,
@@ -389,7 +396,12 @@ export default {
 				this.getRecommendations()
 
 			} catch(response) {
-				// already caugh on the createShare method
+				// focus back if any error 
+				const input = this.$refs.multiselect.$el.querySelector('input')
+				if (input) {
+					input.focus()
+				}
+				this.query = value
 			} finally {
 				this.loading = false
 			}

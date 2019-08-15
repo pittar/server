@@ -276,16 +276,19 @@ export default {
 		 * TODO: allow editing
 		 */
 		title() {
-			if (this.share && !this.isShareOwner) {
-				return t('files_sharing', 'Shared via link by {initiator}', {
-					initiator: this.share.ownerDisplayName
-				})
-			}
-			if (this.share && this.share.label && this.share.label.trim() !== '') {
-				return this.share.label
-			}
-			if (this.share && this.isEmailShareType) {
-				return this.share.shareWith
+			// if we have a valid existing share (not pending)
+			if (this.share && this.share.id) {
+				if (!this.isShareOwner && this.share.ownerDisplayName) {
+					return t('files_sharing', 'Shared via link by {initiator}', {
+						initiator: this.share.ownerDisplayName
+					})
+				}
+				if (this.share.label && this.share.label.trim() !== '') {
+					return this.share.label
+				}
+				if (this.isEmailShareType) {
+					return this.share.shareWith
+				}
 			}
 			return t('files_sharing', 'Share link')
 		},
@@ -393,7 +396,9 @@ export default {
 		 * Create a new share link and append it to the list
 		 */
 		async onNewLinkShare() {
-			const shareDefaults = {}
+			const shareDefaults = {
+				share_type: OC.Share.SHARE_TYPE_LINK
+			}
 			if (this.config.isDefaultExpireDateEnforced) {
 				// default is empty string if not set
 				// expiration is the share object key, not expireDate
@@ -456,7 +461,7 @@ export default {
 				this.loading = true
 				this.open = false
 
-				const path = this.fileInfo.path + this.fileInfo.name
+				const path = (this.fileInfo.path + '/' + this.fileInfo.name).replace('//', '/')
 				const newShare = await this.createShare({
 					path,
 					shareType: OC.Share.SHARE_TYPE_LINK,

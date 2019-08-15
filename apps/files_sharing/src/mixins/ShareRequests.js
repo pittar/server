@@ -50,6 +50,9 @@ export default {
 		async createShare({ path, permissions, shareType, shareWith, publicUpload, password, sendPasswordByTalk, expireDate, label }) {
 			try {
 				const request = await axios.post(shareUrl, { path, permissions, shareType, shareWith, publicUpload, password, sendPasswordByTalk, expireDate, label })
+				if (!'ocs' in request.data) {
+					throw request
+				}
 				return new Share(request.data.ocs.data)
 			} catch (error) {
 				console.error('Error while creating share', error);
@@ -66,7 +69,10 @@ export default {
 		 */
 		async deleteShare(id) {
 			try {
-				await axios.delete(shareUrl + `/${id}`)
+				const request = await axios.delete(shareUrl + `/${id}`)
+				if (!'ocs' in request.data) {
+					throw request
+				}
 				return true
 			} catch (error) {
 				console.error('Error while deleting share', error);
@@ -89,7 +95,10 @@ export default {
 				const data = new URLSearchParams();
 				data.append(property, value);
 				
-				await axios.put(shareUrl + `/${id}`, { [property]: value }, headers)
+				const request = await axios.put(shareUrl + `/${id}`, { [property]: value }, headers)
+				if (!'ocs' in request.data) {
+					throw request
+				}
 				return true
 			} catch (error) {
 				console.error('Error while updating share', error);
