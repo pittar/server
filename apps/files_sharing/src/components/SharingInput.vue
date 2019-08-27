@@ -115,7 +115,7 @@ export default {
 		},
 
 		isValidQuery() {
-			return this.query.trim() !== '' && this.query.length > this.config.minSearchStringLength
+			return this.query && this.query.trim() !== '' && this.query.length > this.config.minSearchStringLength
 		},
 
 		options() {
@@ -401,7 +401,7 @@ export default {
 				if (input) {
 					input.focus()
 				}
-				this.query = value
+				this.query = value.shareWith
 			} finally {
 				this.loading = false
 			}
