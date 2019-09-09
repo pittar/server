@@ -34,8 +34,8 @@ class LegacyLoadAdditionalScriptsAdapter implements IEventListener {
 	/** @var IEventDispatcher */
 	private $dispatcher;
 
-	public function __construct(IEventDispatcher $legacyDispatcher) {
-		$this->dispatcher = $legacyDispatcher;
+	public function __construct(IEventDispatcher $dispatcher) {
+		$this->dispatcher = $dispatcher;
 	}
 
 	public function handle(Event $event): void {
