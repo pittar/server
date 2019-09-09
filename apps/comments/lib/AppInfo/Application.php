@@ -51,10 +51,9 @@ class Application extends App {
 	public function register() {
 		$server = $this->getContainer()->getServer();
 
-		$dispatcher = $server->getEventDispatcher();
 		/** @var IEventDispatcher $newDispatcher */
-		$newDispatcher = $server->query(IEventDispatcher::class);
-		$this->registerSidebarScripts($newDispatcher);
+		$dispatcher = $server->query(IEventDispatcher::class);
+		$this->registerSidebarScripts($dispatcher);
 		$this->registerDavEntity($dispatcher);
 		$this->registerNotifier();
 		$this->registerCommentsEventHandler();
@@ -66,7 +65,7 @@ class Application extends App {
 		$dispatcher->addServiceListener(LoadAdditionalScriptsEvent::class, LoadAdditionalScripts::class);
 	}
 
-	protected function registerDavEntity(EventDispatcherInterface $dispatcher) {
+	protected function registerDavEntity(IEventDispatcher $dispatcher) {
 		$dispatcher->addListener(CommentsEntityEvent::EVENT_ENTITY, function(CommentsEntityEvent $event) {
 			$event->addEntityCollection('files', function($name) {
 				$nodes = \OC::$server->getUserFolder()->getById((int)$name);
