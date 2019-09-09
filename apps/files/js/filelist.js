@@ -672,6 +672,11 @@
 				.addClass(show ? 'icon-toggle-filelist' : 'icon-toggle-pictures')
 				
 			$('.list-container').toggleClass('view-grid', show);
+			if (show) {
+				// If switching into grid view from list view, too few files might be displayed
+				// Try rendering the next page
+				this._onScroll();
+			}
 		},
 
 		/**
@@ -823,7 +828,7 @@
 				this.updateSelectionSummary();
 			} else {
 				// clicked directly on the name
-				if (!this._detailsView || $(event.target).is('.nametext, .name') || $(event.target).closest('.nametext').length) {
+				if (!this._detailsView || $(event.target).is('.nametext, .name, .thumbnail') || $(event.target).closest('.nametext').length) {
 					var filename = $tr.attr('data-file');
 					var renaming = $tr.data('renaming');
 					if (!renaming) {

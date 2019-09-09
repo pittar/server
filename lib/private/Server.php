@@ -449,9 +449,10 @@ class Server extends ServerContainer implements IServerContainer {
 		$this->registerAlias('AllConfig', \OC\AllConfig::class);
 		$this->registerAlias(\OCP\IConfig::class, \OC\AllConfig::class);
 
-		$this->registerService('SystemConfig', function ($c) use ($config) {
+		$this->registerService(\OC\SystemConfig::class, function ($c) use ($config) {
 			return new \OC\SystemConfig($config);
 		});
+		$this->registerAlias('SystemConfig', \OC\SystemConfig::class);
 
 		$this->registerService(\OC\AppConfig::class, function (Server $c) {
 			return new \OC\AppConfig($c->getDatabaseConnection());
@@ -596,14 +597,6 @@ class Server extends ServerContainer implements IServerContainer {
 		});
 		$this->registerAlias('Search', \OCP\ISearch::class);
 
-		$this->registerService(\OC\Security\RateLimiting\Limiter::class, function (Server $c) {
-			return new \OC\Security\RateLimiting\Limiter(
-				$this->getUserSession(),
-				$this->getRequest(),
-				new \OC\AppFramework\Utility\TimeFactory(),
-				$c->query(\OC\Security\RateLimiting\Backend\IBackend::class)
-			);
-		});
 		$this->registerService(\OC\Security\RateLimiting\Backend\IBackend::class, function ($c) {
 			return new \OC\Security\RateLimiting\Backend\MemoryCache(
 				$this->getMemCacheFactory(),

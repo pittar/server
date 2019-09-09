@@ -178,7 +178,6 @@ OC.L10N.register(
     "Credentials" : "Credentials",
     "SMTP Username" : "SMTP Username",
     "SMTP Password" : "SMTP Password",
-    "Store credentials" : "Store credentials",
     "Test email settings" : "Test email settings",
     "Send email" : "Send email",
     "Security & setup warnings" : "Security & setup warnings",
@@ -208,8 +207,6 @@ OC.L10N.register(
     "Background job didn’t run yet!" : "Background job didn’t run yet!",
     "For optimal performance it's important to configure background jobs correctly. For bigger instances 'Cron' is the recommended setting. Please see the documentation for more information." : "For optimal performance it's important to configure background jobs correctly. For bigger instances 'Cron' is the recommended setting. Please see the documentation for more information.",
     "Execute one task with each page loaded" : "Execute one task with each page loaded",
-    "cron.php is registered at a webcron service to call cron.php every 15 minutes over HTTP." : "cron.php is registered at a webcron service to call cron.php every 15 minutes over HTTP.",
-    "Use system cron service to call the cron.php file every 15 minutes." : "Use system cron service to call the cron.php file every 15 minutes.",
     "The cron.php needs to be executed by the system user \"%s\"." : "The cron.php needs to be executed by the system user \"%s\".",
     "To run this you need the PHP POSIX extension. See {linkstart}PHP documentation{linkend} for more details." : "To run this you need the PHP POSIX extension. See {linkstart}PHP documentation{linkend} for more details.",
     "Sharing" : "Sharing",
@@ -265,6 +262,9 @@ OC.L10N.register(
     "Twitter handle @…" : "Twitter handle @…",
     "Help translate" : "Help translate",
     "Current password" : "Current password",
-    "Change password" : "Change password"
+    "Change password" : "Change password",
+    "Store credentials" : "Store credentials",
+    "cron.php is registered at a webcron service to call cron.php every 15 minutes over HTTP." : "cron.php is registered at a webcron service to call cron.php every 15 minutes over HTTP.",
+    "Use system cron service to call the cron.php file every 15 minutes." : "Use system cron service to call the cron.php file every 15 minutes."
 },
 "nplurals=2; plural=(n != 1);");

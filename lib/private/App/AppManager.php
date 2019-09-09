@@ -13,6 +13,7 @@
  * @author Robin Appelman <robin@icewind.nl>
  * @author Thomas Müller <thomas.mueller@tmit.eu>
  * @author Vincent Petry <pvince81@owncloud.com>
+ * @author Daniel Rudolf <nextcloud.com@daniel-rudolf.de>
  *
  * @license AGPL-3.0
  *
@@ -91,6 +92,9 @@ class AppManager implements IAppManager {
 	/** @var array */
 	private $appVersions = [];
 
+	/** @var array */
+	private $autoDisabledApps = [];
+
 	/**
 	 * @param IUserSession $userSession
 	 * @param AppConfig $appConfig
@@ -165,6 +169,13 @@ class AppManager implements IAppManager {
 			return $this->checkAppForGroups($enabled, $group);
 		});
 		return array_keys($appsForGroups);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getAutoDisabledApps(): array {
+		return $this->autoDisabledApps;
 	}
 
 	/**
@@ -351,12 +362,18 @@ class AppManager implements IAppManager {
 	 * Disable an app for every user
 	 *
 	 * @param string $appId
+	 * @param bool $automaticDisabled
 	 * @throws \Exception if app can't be disabled
 	 */
-	public function disableApp($appId) {
+	public function disableApp($appId, $automaticDisabled = false) {
 		if ($this->isAlwaysEnabled($appId)) {
 			throw new \Exception("$appId can't be disabled.");
 		}
+
+		if ($automaticDisabled) {
+			$this->autoDisabledApps[] = $appId;
+		}
+
 		unset($this->installedAppsCache[$appId]);
 		$this->appConfig->setValue($appId, 'enabled', 'no');
 
@@ -385,6 +402,21 @@ class AppManager implements IAppManager {
 			throw new AppPathNotFoundException('Could not find path for ' . $appId);
 		}
 		return $appPath;
+	}
+
+	/**
+	 * Get the web path for the given app.
+	 *
+	 * @param string $appId
+	 * @return string
+	 * @throws AppPathNotFoundException if app path can't be found
+	 */
+	public function getAppWebPath(string $appId): string {
+		$appWebPath = \OC_App::getAppWebPath($appId);
+		if($appWebPath === false) {
+			throw new AppPathNotFoundException('Could not find web path for ' . $appId);
+		}
+		return $appWebPath;
 	}
 
 	/**

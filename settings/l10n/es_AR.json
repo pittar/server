@@ -166,7 +166,6 @@
     "Credentials" : "Credenciales",
     "SMTP Username" : "nombre de usuario SMTP",
     "SMTP Password" : "Contraseña SMTP",
-    "Store credentials" : "Almacenar credenciales",
     "Test email settings" : "Probar las configuraciones de correo electrónico",
     "Send email" : "Enviar correo electrónico",
     "Security & setup warnings" : "Advertencias de seguridad y configuración",
@@ -193,7 +192,6 @@
     "Background job didn’t run yet!" : "¡El trabajo de segundo plano aún no ha corrido!",
     "For optimal performance it's important to configure background jobs correctly. For bigger instances 'Cron' is the recommended setting. Please see the documentation for more information." : "Para un desempeño ideal, es importante configurar los trabajos de fondo correctametne. Para instancias más grandes 'Cron' es el ajuste recomendado. Favor de consultar la documentación para más información. ",
     "Execute one task with each page loaded" : "Ejecutar una tarea con cada página cargada",
-    "Use system cron service to call the cron.php file every 15 minutes." : "Usar el servicio cron del sistema para llamar al archivo cron.php cada 15 minutos. ",
     "The cron.php needs to be executed by the system user \"%s\"." : "El cron.php necesita ser ejecutado por el usuario del sistema \"%s\".",
     "Sharing" : "Compartiendo",
     "As admin you can fine-tune the sharing behavior. Please see the documentation for more information." : "Como administrador, usted puede hacer ajustes finos al comportamiento de compartir. Favor de consultar la documentación para más información. ",
@@ -238,6 +236,8 @@
     "Twitter handle @…" : "Cuenta de twitter @...",
     "Help translate" : "Ayude a traducir",
     "Current password" : "Contraseña actual",
-    "Change password" : "Cambiar contraseña"
+    "Change password" : "Cambiar contraseña",
+    "Store credentials" : "Almacenar credenciales",
+    "Use system cron service to call the cron.php file every 15 minutes." : "Usar el servicio cron del sistema para llamar al archivo cron.php cada 15 minutos. "
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

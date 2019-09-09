@@ -978,9 +978,9 @@ class OC_Util {
 				$data = $result->fetchRow();
 				if (isset($data['server_version'])) {
 					$version = $data['server_version'];
-					if (version_compare($version, '9.5.0', '<')) {
+					if (version_compare($version, '9.0.0', '<')) {
 						$errors[] = array(
-							'error' => $l->t('PostgreSQL >= 9.5 required'),
+							'error' => $l->t('PostgreSQL >= 9 required'),
 							'hint' => $l->t('Please upgrade your database version')
 						);
 					}
@@ -1249,6 +1249,18 @@ class OC_Util {
 			$content = false;
 		}
 
+		if (strpos($url, 'https:') === 0) {
+			$url = 'http:' . substr($url, 6);
+		} else {
+			$url = 'https:' . substr($url, 5);
+		}
+
+		try {
+			$fallbackContent = \OC::$server->getHTTPClientService()->newClient()->get($url)->getBody();
+		} catch (\Exception $e) {
+			$fallbackContent = false;
+		}
+
 		// cleanup
 		@unlink($testFile);
 
@@ -1256,7 +1268,7 @@ class OC_Util {
 		 * If the content is not equal to test content our .htaccess
 		 * is working as required
 		 */
-		return $content !== $testContent;
+		return $content !== $testContent && $fallbackContent !== $testContent;
 	}
 
 	/**
