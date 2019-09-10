@@ -37,7 +37,7 @@
 				@click.stop.prevent="copyLink">{{ clipboardTooltip }}</ActionLink>
 		</Actions>
 
-		<!-- pensing actions -->
+		<!-- pending actions -->
 		<Actions v-if="!loading && (pendingPassword || pendingExpirationDate)"
 			class="sharing-entry__actions" menu-align="right"
 			:open.sync="open" @close="onNewLinkShare">
@@ -55,7 +55,13 @@
 			<ActionText v-if="pendingPassword" icon="icon-password">
 				{{ t('files_sharing', 'Password protection (enforced)') }}
 			</ActionText>
-			<ActionInput  v-if="pendingPassword"
+			<ActionCheckbox v-else-if="config.enableLinkPasswordByDefault"
+				:checked.sync="isPasswordProtected"
+				:disabled="config.enforcePasswordForPublicLink || saving"
+				@uncheck="onPasswordDisable">
+				{{ t('files_sharing', 'Password protection') }}
+			</ActionCheckbox>
+			<ActionInput v-if="pendingPassword || share.password"
 				:value.sync="share.password"
 				:disabled="saving"
 				icon=""
@@ -577,7 +583,10 @@ export default {
 		 */
 		onPasswordDisable() {
 			this.share.password = ''
-			this.queueUpdate('password')
+			// only update if valid share.
+			if (this.share.id) {
+				this.queueUpdate('password')
+			}
 		},
 
 		/**

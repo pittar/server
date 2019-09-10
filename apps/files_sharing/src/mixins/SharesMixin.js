@@ -226,27 +226,31 @@ export default {
 		 * @param {string} property the property to sync
 		 */
 		queueUpdate(property) {
-			const value = this.share[property]
-			this.updateQueue.add(async () => {
-				this.saving = true
-				try {
-					await this.updateShare(this.share.id, {
-						property,
-						value
-					})
+			if (this.share.id) {
+				const value = this.share[property]
+				this.updateQueue.add(async () => {
+					this.saving = true
+					try {
+						await this.updateShare(this.share.id, {
+							property,
+							value
+						})
 
-					// reset password state after sync
-					if (property === 'password') {
-						this.$delete(this.share, 'newPassword')
+						// reset password state after sync
+						if (property === 'password') {
+							this.$delete(this.share, 'newPassword')
+						}
+						// clear any previous errors
+						this.$delete(this.errors, property)
+					} catch({ property, message }) {
+						this.onSyncError(property, message)
+					} finally {
+						this.saving = false
 					}
-					// clear any previous errors
-					this.$delete(this.errors, property)
-				} catch({ property, message }) {
-					this.onSyncError(property, message)
-				} finally {
-					this.saving = false
-				}
-			})
+				})
+			} else {
+				console.error('Cannot update share.', this.share, 'No valid id')
+			}
 		},
 
 		/**
