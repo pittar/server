@@ -70,7 +70,7 @@ class Manager {
 		// Generate new key
 		$res = openssl_pkey_new($config);
 
-		if ($res === null) {
+		if ($res === false) {
 			$this->logOpensslError();
 			throw new \RuntimeException('OpenSSL reported a problem');
 		}
