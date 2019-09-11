@@ -36,4 +36,4 @@ new View({
 	propsData: {
 		tokens: OCP.InitialState.loadState('settings', 'app_tokens'),
 	}
-}).$mount('#security');
+}).$mount('#security-authtokens');
