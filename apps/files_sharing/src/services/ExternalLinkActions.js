@@ -20,7 +20,7 @@
  *
  */
 
-export default class ShareSearch {
+export default class ExternalLinkActions {
 
 	#state;
 
@@ -29,15 +29,15 @@ export default class ShareSearch {
 		this.#state = {}
 		
 		// init default values
-		this.#state.results = []
-		console.debug('OCA.Sharing.ShareSearch initialized')
+		this.#state.actions = []
+		console.debug('OCA.Sharing.ExternalLinkActions initialized')
 	}
 
 	/**
 	 * Get the state
 	 *
 	 * @readonly
-	 * @memberof ShareSearch
+	 * @memberof ExternalLinkActions
 	 * @returns {Object} the data state
 	 */
 	get state() {
@@ -45,25 +45,17 @@ export default class ShareSearch {
 	}
 
 	/**
-	 * Register a new result
-	 * Mostly used by the guests app.
-	 * We should consider deprecation and add results via php ?
+	 * Register a new action for the link share
+	 * Mostly used by the social sharing app.
 	 * 
-	 * @param {Object} result
-	 * @param {string} [result.user] entry user
-	 * @param {string} result.displayName entry first line
-	 * @param {string} [result.desc] entry second line 
-	 * @param {string} [result.icon] entry icon
-	 * @param {function} result.handler function to run on entry selection
-	 * @param {function} [result.condition] condition to add entry or not
+	 * @param {Object} action
 	 */
-	addNewResult(result) {
-		if (result.displayName.trim() !== ''
-			&& typeof result.handler === 'function') {
-			this.#state.results.push(result)
+	registerAction(action) {
+		if (typeof action === 'object' && action.render && action.components) {
+			this.#state.actions.push(action)
 			return true
 		}
-		console.error(`Invalid search result provided`, result);
+		console.error(`Invalid action component provided`, action);
 		return false
 	}
 }

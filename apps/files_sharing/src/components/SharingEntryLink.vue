@@ -204,6 +204,8 @@
 						@update:value="debounceQueueUpdate('note')" />
 				</template>
 
+				<components v-for="(action, index) in externalActions" :is="action" :key="index" />
+
 				<ActionButton icon="icon-delete" :disabled="saving" @click.prevent="onDelete">
 					{{ t('files_sharing', 'Delete share') }}
 				</ActionButton>
@@ -272,11 +274,12 @@ export default {
 			publicUploadRWValue: OC.PERMISSION_UPDATE | OC.PERMISSION_CREATE | OC.PERMISSION_READ | OC.PERMISSION_DELETE,
 			publicUploadRValue: OC.PERMISSION_READ,
 			publicUploadWValue: OC.PERMISSION_CREATE,
+
+			ExternalLinkActions: OCA.Sharing.ExternalLinkActions.state,
 		}
 	},
 
 	computed: {
-
 		/**
 		 * Link share label
 		 * TODO: allow editing
@@ -394,7 +397,14 @@ export default {
 					: t('files_sharing', 'Cannot copy, please copy the link manually')
 			}
 			return t('files_sharing', 'Copy to clipboard')
-		}
+		},
+
+		/**
+		 * External aditionnal actions for the menu
+		 */
+		externalActions() {
+			return this.ExternalLinkActions.actions
+		},
 	},
 
 	methods: {

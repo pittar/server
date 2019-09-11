@@ -20,12 +20,16 @@
  *
  */
 
-
 import SharingTab from './views/SharingTab'
 import ShareSearch from './services/ShareSearch'
+import ExternalLinkActions from './services/ExternalLinkActions'
 
 if (window.OCA && window.OCA.Sharing) {
 	Object.assign(window.OCA.Sharing, { ShareSearch: new ShareSearch() })
+}
+
+if (window.OCA && window.OCA.Sharing) {
+	Object.assign(window.OCA.Sharing, { ExternalLinkActions: new ExternalLinkActions() })
 }
 
 window.addEventListener('DOMContentLoaded', () => {
