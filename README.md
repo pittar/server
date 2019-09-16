@@ -26,8 +26,10 @@ $ oc apply -f https://raw.githubusercontent.com/pittar/server/b16.0.4/ocp/nextcl
 Instantiate the template:
 
 ```
-$ oc new-app nextcloud-tempalte
+$ oc new-app nextcloud-template
 ```
+
+You can now go into the `nextcloud` project in OpenShift and watch the build start and containers spin up.
 
 This will:
 * Create a `BuildConfig` that will build Nextcloud from this Github repository and branch using the `PHP 7.1` source-to-image builder.
@@ -39,9 +41,21 @@ This will:
 
 **When the deployment completes**
 
+
+0. **READ ALL INSTRUCTIONS BEFORE CLICKING FINISH SETUP**
 1. Click on the Route URL for Nextcloud (above the pod in the OpenShift UI).
 2. Provide an admin username and password (you will use this to login).
-3. Click on the data link.
+3. Click on the *Storage and Database* Link below the username/password fields.
+4. Leave the data folder as is.
+5. For "Configure the database" choose *PostgreSQL*.
+6. Enter the following values:
+    * Database user: `nextcloud`
+    * Database password: `nextcloud`
+    * Database name: `nextcloud`
+    * Database host: `nextcloud-db` (erase `localhost`)
+7. Click "Finish setup"
+
+This will take a few seconds, but your browser may timeout.  If this happens, close the tab and click on the route link again from the OpenShift UI.  You will now be able to sign in with the user/pass you set in step #2.
 
 
 ## Why is this so awesome? 🤩
