@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$(ls -A $APP_DATA/config)" ]; then
+if [ -f "$APP_DATA/config/CAN_INSTALL" ]; then
      echo "Config directory is not empty.  Skipping copy."
 else
     echo "Config directory is empty.  Strating copy."
