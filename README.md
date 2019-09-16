@@ -9,6 +9,41 @@
 
 ![](https://raw.githubusercontent.com/nextcloud/screenshots/master/files/Files%20Sharing.png)
 
+## OpenShift Instructions
+
+Create a new project called "Nextcloud":
+
+```
+$ oc new-project nextcoud
+```
+
+Create the Nextcloud template:
+
+```
+$ oc apply -f https://raw.githubusercontent.com/pittar/server/b16.0.4/ocp/nextcloud.yaml
+```
+
+Instantiate the template:
+
+```
+$ oc new-app nextcloud-tempalte
+```
+
+This will:
+* Create a `BuildConfig` that will build Nextcloud from this Github repository and branch using the `PHP 7.1` source-to-image builder.
+* Create an ImageStream for the resulting `nextcloud` container image.
+* Create a PostgreSQL database with a 5Gi Persistent Volume Claim for the data.
+* Create a DeplymentConfig for Nextcloud, as well as Persistent Volume Claim for the `data` directory and another Persitent Volume Clain form the `config` directory.
+* Services for both the database and nextcloud.
+* A route to expost the Nextcloud service and provide a URL.
+
+**When the deployment completes**
+
+1. Click on the Route URL for Nextcloud (above the pod in the OpenShift UI).
+2. Provide an admin username and password (you will use this to login).
+3. Click on the data link.
+
+
 ## Why is this so awesome? 🤩
 
 * 📁 **Access your Data** You can store your files, contacts, calendars and more on a server of your choosing.

@@ -1,0 +1,323 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: nextcloud-template
+labels:
+  template: nextcloud-template
+  app: nextcloud
+objects:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      app.openshift.io/vcs-ref: master
+      app.openshift.io/vcs-uri: https://github.com/pittar/server
+    labels:
+      app.kubernetes.io/component: nextcloud
+      app.kubernetes.io/instance: nextcloud
+      app.kubernetes.io/name: php
+      app.kubernetes.io/part-of: nextcloud
+      app.openshift.io/runtime: php
+      app.openshift.io/runtime-version: "7.1"
+    name: nextcloud
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      app.openshift.io/connects-to: nextcloud-db
+      app.openshift.io/vcs-ref: b16.0.4
+      app.openshift.io/vcs-uri: https://github.com/pittar/server
+    labels:
+      app.kubernetes.io/name: php
+      app.kubernetes.io/part-of: nextcloud
+      app.openshift.io/runtime: php
+      app.openshift.io/runtime-version: "7.1"
+    name: nextcloud
+  spec:
+    failedBuildsHistoryLimit: 5
+    output:
+      to:
+        kind: ImageStreamTag
+        name: nextcloud:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: /
+      git:
+        ref: b16.0.4
+        uri: https://github.com/pittar/server
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: php:7.1
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - imageChange:
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Secret
+  data:
+    database-name: bmV4dGNsb3Vk
+    database-password: bmV4dGNsb3Vk
+    database-user: bmV4dGNsb3Vk
+  metadata:
+    annotations:
+      template.openshift.io/expose-database_name: '{.data[''database-name'']}'
+      template.openshift.io/expose-password: '{.data[''database-password'']}'
+      template.openshift.io/expose-username: '{.data[''database-user'']}'
+    name: nextcloud-db
+  type: Opaque
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: nextcloud-db
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: config
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app.kubernetes.io/component: nextcloud
+      app.kubernetes.io/part-of: nextcloud
+    name: nextcloud
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: nextcloud
+      deploymentconfig: nextcloud
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: nextcloud
+          deploymentconfig: nextcloud
+      spec:
+        containers:
+        - env:
+          - name: POSTGRES_DB
+            value: nextcloud
+          - name: POSTGRES_USER
+            value: nextcloud
+          - name: POSTGRES_PASSWORD
+            value: nextcloud
+          - name: POSTGRES_HOST
+            value: nextcloud-db
+          imagePullPolicy: Always
+          name: nextcloud
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/app-root/src/data
+            name: data
+          - mountPath: /opt/app-root/src/config
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: config
+          persistentVolumeClaim:
+            claimName: config
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - nextcloud
+        from:
+          kind: ImageStreamTag
+          name: nextcloud:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: nextcloud-db
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      name: nextcloud-db
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          name: nextcloud-db
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                key: database-user
+                name: nextcloud-db
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-password
+                name: nextcloud-db
+          - name: POSTGRESQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                key: database-name
+                name: nextcloud-db
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+              - /usr/libexec/check-container
+              - --live
+            failureThreshold: 3
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: postgresql
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /usr/libexec/check-container
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 512Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+            procMount: Default
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: nextcloud-db-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: nextcloud-db-data
+          persistentVolumeClaim:
+            claimName: nextcloud-db
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:10
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app.kubernetes.io/component: nextcloud
+    name: nextcloud
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: nextcloud
+      deploymentconfig: nextcloud
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      template.openshift.io/expose-uri: postgres://{.spec.clusterIP}:{.spec.ports[?(.name=="postgresql")].port}
+    name: nextcloud-db
+  spec:
+    ports:
+    - name: postgresql
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+    selector:
+      name: nextcloud-db
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app.kubernetes.io/component: nextcloud
+      app.kubernetes.io/part-of: nextcloud
+    name: nextcloud
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: nextcloud
+      weight: 100
+    wildcardPolicy: None
